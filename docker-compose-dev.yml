@@ -11,7 +11,7 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ../sql:/docker-entrypoint-initdb.d:ro
+      - ./sql:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-swiggyit} -d ${POSTGRES_DB:-swiggyit}"]
       interval: 10s
@@ -19,7 +19,9 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/dannotes/swiggyit:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: swiggyit-app
     depends_on:
       postgres:
@@ -31,8 +33,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-swiggyit}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-swiggyit_secret}
     volumes:
-      - ../input:/data/input:ro
-      - ../.tmp:/data/.tmp
+      - ./input:/data/input:ro
+      - ./.tmp:/data/.tmp
 
   grafana:
     image: grafana/grafana:latest
@@ -52,7 +54,7 @@ services:
       - "${GRAFANA_PORT:-3000}:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
 
 volumes:
   pgdata:

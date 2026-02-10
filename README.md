@@ -40,7 +40,7 @@ You'll need to request separate reports for **Food** and **Instamart**. If you w
 
 ```bash
 git clone https://github.com/dannotes/swiggyit.git
-cd swiggyit/deploy
+cd swiggyit
 
 cp .env.example .env
 # Edit .env and set your passwords
@@ -56,13 +56,15 @@ input/
     └── order_summary_instamart_<uuid>.pdf
 ```
 
-### 3. Run the pipeline
+### 3. Start the stack
 
 ```bash
-docker compose run --rm app
+docker compose up -d
 ```
 
-This pulls the pre-built image from `ghcr.io/dannotes/swiggyit`, starts PostgreSQL (auto-creates the schema on first run), parses your PDFs, and loads everything into the database.
+This pulls the pre-built image from `ghcr.io/dannotes/swiggyit`, starts PostgreSQL (auto-creates the schema on first run), runs the parser to load your PDFs, and brings up Grafana.
+
+Open [http://localhost:3000](http://localhost:3000) and log in with `admin` / `admin` (or your configured password from `.env`).
 
 ### 4. Output
 
@@ -94,14 +96,6 @@ Done!
 
 A pre-built Grafana dashboard with 30+ panels visualizes your spending across four sections:
 
-### Start Grafana
-
-```bash
-docker compose up -d postgres grafana
-```
-
-Open [http://localhost:3000](http://localhost:3000) and log in with `admin` / `admin` (or your configured password from `.env`).
-
 ### Overview
 Total orders, grand total spend, food vs instamart breakdown, monthly and weekly spending trends.
 
@@ -127,7 +121,6 @@ Orders by day of week, order value distribution, cumulative spend over time, rep
 To build and run locally instead of pulling the pre-built image:
 
 ```bash
-cd deploy
 docker compose -f docker-compose-dev.yml up --build
 ```
 
@@ -174,13 +167,12 @@ swiggyit/
 ├── README.md
 ├── requirements.txt
 ├── pytest.ini
+├── .env.example
+├── docker-compose.yml            # Production (pulls from GHCR)
+├── docker-compose-dev.yml        # Development (local build)
 ├── .github/
 │   └── workflows/
 │       └── ci.yml                # Tests + GHCR image publish
-├── deploy/
-│   ├── docker-compose.yml        # Production (pulls from GHCR)
-│   ├── docker-compose-dev.yml    # Development (local build)
-│   └── .env.example
 ├── grafana/
 │   └── provisioning/
 │       ├── datasources/
