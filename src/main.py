@@ -226,12 +226,6 @@ def main():
 
     print(f"Database:  connected")
 
-    # Ensure schema exists (idempotent - safe to run every time)
-    schema_path = Path(__file__).resolve().parent.parent / "sql" / "schema.sql"
-    if schema_path.exists():
-        conn.execute(schema_path.read_text())
-        conn.commit()
-
     try:
         process_food(args.input, args.tmp, conn)
         process_instamart(args.input, args.tmp, conn)
