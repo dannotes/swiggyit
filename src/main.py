@@ -221,10 +221,16 @@ def main():
         conn = psycopg.connect(db_url, autocommit=False)
     except psycopg.OperationalError as e:
         print(f"\nFailed to connect to PostgreSQL: {e}")
-        print("Make sure the database is running: cd deploy && docker compose up -d")
+        print("Make sure the database is running: docker compose up -d postgres")
         sys.exit(1)
 
     print(f"Database:  connected")
+
+    # Ensure schema exists (idempotent - safe to run every time)
+    schema_path = Path(__file__).resolve().parent.parent / "sql" / "schema.sql"
+    if schema_path.exists():
+        conn.execute(schema_path.read_text())
+        conn.commit()
 
     try:
         process_food(args.input, args.tmp, conn)

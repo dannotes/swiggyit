@@ -190,19 +190,19 @@ CREATE TABLE IF NOT EXISTS instamart_handling_fees (
 -- ============================================================
 
 -- Time-series queries (Grafana)
-CREATE INDEX idx_food_orders_date ON food_orders(date_of_invoice);
-CREATE INDEX idx_instamart_orders_date ON instamart_orders(date_of_invoice);
+CREATE INDEX IF NOT EXISTS idx_food_orders_date ON food_orders(date_of_invoice);
+CREATE INDEX IF NOT EXISTS idx_instamart_orders_date ON instamart_orders(date_of_invoice);
 
 -- Grouping queries
-CREATE INDEX idx_food_orders_restaurant ON food_orders(restaurant_name);
-CREATE INDEX idx_instamart_orders_seller ON instamart_orders(seller_name);
-CREATE INDEX idx_instamart_items_hsn ON instamart_order_items(hsn_sac_code);
+CREATE INDEX IF NOT EXISTS idx_food_orders_restaurant ON food_orders(restaurant_name);
+CREATE INDEX IF NOT EXISTS idx_instamart_orders_seller ON instamart_orders(seller_name);
+CREATE INDEX IF NOT EXISTS idx_instamart_items_hsn ON instamart_order_items(hsn_sac_code);
 
 -- FK lookups
-CREATE INDEX idx_food_items_order ON food_order_items(order_id);
-CREATE INDEX idx_instamart_items_order ON instamart_order_items(order_id);
-CREATE INDEX idx_instamart_fees_order ON instamart_handling_fees(order_id);
+CREATE INDEX IF NOT EXISTS idx_food_items_order ON food_order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_instamart_items_order ON instamart_order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_instamart_fees_order ON instamart_handling_fees(order_id);
 
 -- Multi-customer filtering
-CREATE INDEX idx_food_orders_customer ON food_orders(customer_id);
-CREATE INDEX idx_instamart_orders_customer ON instamart_orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_food_orders_customer ON food_orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_instamart_orders_customer ON instamart_orders(customer_id);

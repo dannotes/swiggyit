@@ -86,7 +86,7 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT count(*) AS total_orders FROM (SELECT order_id FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) UNION ALL SELECT order_id FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)) combined;",
+          "rawSql": "SELECT count(*) AS total_orders FROM (SELECT order_id FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) UNION ALL SELECT order_id FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer))) combined;",
           "refId": "A"
         }
       ],
@@ -147,7 +147,7 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT round(sum(total)::numeric, 2) AS grand_total FROM (SELECT invoice_total AS total FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) UNION ALL SELECT invoice_value FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)) combined;",
+          "rawSql": "SELECT round(sum(total)::numeric, 2) AS grand_total FROM (SELECT invoice_total AS total FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) UNION ALL SELECT invoice_value FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer))) combined;",
           "refId": "A"
         }
       ],
@@ -244,12 +244,12 @@
       "targets": [
         {
           "format": "time_series",
-          "rawSql": "SELECT date_trunc('month', date_of_invoice) AS time, round(sum(invoice_total)::numeric, 2) AS food_spend FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY 1;",
+          "rawSql": "SELECT date_trunc('month', date_of_invoice) AS time, round(sum(invoice_total)::numeric, 2) AS food_spend FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY 1;",
           "refId": "A"
         },
         {
           "format": "time_series",
-          "rawSql": "SELECT date_trunc('month', date_of_invoice) AS time, round(sum(invoice_value)::numeric, 2) AS instamart_spend FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY 1;",
+          "rawSql": "SELECT date_trunc('month', date_of_invoice) AS time, round(sum(invoice_value)::numeric, 2) AS instamart_spend FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY 1;",
           "refId": "B"
         }
       ],
@@ -310,7 +310,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT count(*) AS food_orders FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer);",
+          "rawSql": "SELECT count(*) AS food_orders FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer));",
           "refId": "A",
           "sql": {
             "columns": [
@@ -388,7 +388,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT count(*) AS instamart_orders FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer);",
+          "rawSql": "SELECT count(*) AS instamart_orders FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer));",
           "refId": "A",
           "sql": {
             "columns": [
@@ -471,7 +471,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT 'Food' AS type, round(sum(invoice_total)::numeric, 2) AS spend FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) UNION ALL SELECT 'Instamart', round(sum(invoice_value)::numeric, 2) FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer);",
+          "rawSql": "SELECT 'Food' AS type, round(sum(invoice_total)::numeric, 2) AS spend FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) UNION ALL SELECT 'Instamart', round(sum(invoice_value)::numeric, 2) FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer));",
           "refId": "A",
           "sql": {
             "columns": [
@@ -587,7 +587,7 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT month, coalesce(food_orders, 0) AS food_orders, coalesce(instamart_orders, 0) AS instamart_orders FROM (SELECT date_trunc('month', date_of_invoice)::date AS month, count(*) AS food_orders FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1) f FULL OUTER JOIN (SELECT date_trunc('month', date_of_invoice)::date AS month, count(*) AS instamart_orders FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1) i USING (month) ORDER BY month;",
+          "rawSql": "SELECT month, coalesce(food_orders, 0) AS food_orders, coalesce(instamart_orders, 0) AS instamart_orders FROM (SELECT date_trunc('month', date_of_invoice)::date AS month, count(*) AS food_orders FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1) f FULL OUTER JOIN (SELECT date_trunc('month', date_of_invoice)::date AS month, count(*) AS instamart_orders FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1) i USING (month) ORDER BY month;",
           "refId": "A"
         }
       ],
@@ -688,7 +688,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT date_trunc('week', date_of_invoice) AS time, round(sum(invoice_total)::numeric, 2) AS food_spend FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY 1;",
+          "rawSql": "SELECT date_trunc('week', date_of_invoice) AS time, round(sum(invoice_total)::numeric, 2) AS food_spend FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY 1;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -710,7 +710,7 @@
         },
         {
           "format": "time_series",
-          "rawSql": "SELECT date_trunc('week', date_of_invoice) AS time, round(sum(invoice_value)::numeric, 2) AS instamart_spend FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY 1;",
+          "rawSql": "SELECT date_trunc('week', date_of_invoice) AS time, round(sum(invoice_value)::numeric, 2) AS instamart_spend FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY 1;",
           "refId": "B"
         }
       ],
@@ -806,7 +806,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT 'Food' AS type, count(*) AS orders, round(sum(invoice_total)::numeric, 2) AS total_spend, round(avg(invoice_total)::numeric, 2) AS avg_order, round(min(invoice_total)::numeric, 2) AS min_order, round(max(invoice_total)::numeric, 2) AS max_order FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) UNION ALL SELECT 'Instamart', count(*), round(sum(invoice_value)::numeric, 2), round(avg(invoice_value)::numeric, 2), round(min(invoice_value)::numeric, 2), round(max(invoice_value)::numeric, 2) FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer);",
+          "rawSql": "SELECT 'Food' AS type, count(*) AS orders, round(sum(invoice_total)::numeric, 2) AS total_spend, round(avg(invoice_total)::numeric, 2) AS avg_order, round(min(invoice_total)::numeric, 2) AS min_order, round(max(invoice_total)::numeric, 2) AS max_order FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) UNION ALL SELECT 'Instamart', count(*), round(sum(invoice_value)::numeric, 2), round(avg(invoice_value)::numeric, 2), round(min(invoice_value)::numeric, 2), round(max(invoice_value)::numeric, 2) FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer));",
           "refId": "A",
           "sql": {
             "columns": [
@@ -894,7 +894,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "SELECT restaurant_name, count(*) AS orders, round(sum(invoice_total)::numeric, 2) AS total_spend, round(avg(invoice_total)::numeric, 2) AS avg_order, min(date_of_invoice) AS first_order, max(date_of_invoice) AS last_order FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY restaurant_name ORDER BY total_spend DESC;",
+              "rawSql": "SELECT restaurant_name, count(*) AS orders, round(sum(invoice_total)::numeric, 2) AS total_spend, round(avg(invoice_total)::numeric, 2) AS avg_order, min(date_of_invoice) AS first_order, max(date_of_invoice) AS last_order FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY restaurant_name ORDER BY total_spend DESC;",
               "refId": "A"
             }
           ],
@@ -963,7 +963,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "SELECT restaurant_name, count(*) AS order_count FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY restaurant_name HAVING count(*) > 1 ORDER BY order_count DESC;",
+              "rawSql": "SELECT restaurant_name, count(*) AS order_count FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY restaurant_name HAVING count(*) > 1 ORDER BY order_count DESC;",
               "refId": "A"
             }
           ],
@@ -1041,7 +1041,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT fi.description, sum(fi.quantity) AS total_qty, count(DISTINCT fi.order_id) AS in_orders, round(avg(fi.unit_price)::numeric, 2) AS avg_unit_price, round(sum(fi.net_assessable_value)::numeric, 2) AS total_spend FROM food_order_items fi JOIN food_orders fo ON fi.order_id = fo.order_id WHERE $__timeFilter(fo.date_of_invoice) AND fo.customer_id IN ($customer) AND fi.description NOT ILIKE '%packing%' GROUP BY fi.description ORDER BY total_qty DESC LIMIT 20;",
+              "rawSql": "SELECT fi.description, sum(fi.quantity) AS total_qty, count(DISTINCT fi.order_id) AS in_orders, round(avg(fi.unit_price)::numeric, 2) AS avg_unit_price, round(sum(fi.net_assessable_value)::numeric, 2) AS total_spend FROM food_order_items fi JOIN food_orders fo ON fi.order_id = fo.order_id WHERE $__timeFilter(fo.date_of_invoice) AND fo.(0 IN ($customer) OR customer_id IN ($customer)) AND fi.description NOT ILIKE '%packing%' GROUP BY fi.description ORDER BY total_qty DESC LIMIT 20;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1131,7 +1131,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n      fi.description AS metric,\n      round(sum(fi.net_assessable_value)::numeric, 2) AS total_spend\n  FROM food_order_items fi\n  JOIN food_orders fo ON fi.order_id = fo.order_id\n  WHERE $__timeFilter(fo.date_of_invoice)\n    AND fo.customer_id IN ($customer)\n  GROUP BY fi.description\n  ORDER BY total_spend DESC\n  LIMIT 5;",
+              "rawSql": "SELECT\n      fi.description AS metric,\n      round(sum(fi.net_assessable_value)::numeric, 2) AS total_spend\n  FROM food_order_items fi\n  JOIN food_orders fo ON fi.order_id = fo.order_id\n  WHERE $__timeFilter(fo.date_of_invoice)\n    AND fo.(0 IN ($customer) OR customer_id IN ($customer))\n  GROUP BY fi.description\n  ORDER BY total_spend DESC\n  LIMIT 5;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1226,7 +1226,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT restaurant_name, count(*) AS orders, \nround(sum(total_taxes)::numeric, 2) AS total_tax, \nround(sum(invoice_total)::numeric, 2) AS total_spend\nFROM food_orders \nWHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) \nGROUP BY restaurant_name \nORDER BY total_tax DESC;",
+              "rawSql": "SELECT restaurant_name, count(*) AS orders, \nround(sum(total_taxes)::numeric, 2) AS total_tax, \nround(sum(invoice_total)::numeric, 2) AS total_spend\nFROM food_orders \nWHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) \nGROUP BY restaurant_name \nORDER BY total_tax DESC;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1336,7 +1336,7 @@
           "targets": [
             {
               "format": "time_series",
-              "rawSql": "SELECT date_trunc('month', date_of_invoice) AS time, round(sum(total_taxes)::numeric, 2) AS food_tax FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY 1;",
+              "rawSql": "SELECT date_trunc('month', date_of_invoice) AS time, round(sum(total_taxes)::numeric, 2) AS food_tax FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY 1;",
               "refId": "A"
             }
           ],
@@ -1416,7 +1416,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "SELECT seller_name, count(*) AS orders, round(sum(invoice_value)::numeric, 2) AS total_spend, round(avg(invoice_value)::numeric, 2) AS avg_order FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY seller_name ORDER BY total_spend DESC;",
+              "rawSql": "SELECT seller_name, count(*) AS orders, round(sum(invoice_value)::numeric, 2) AS total_spend, round(avg(invoice_value)::numeric, 2) AS avg_order FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY seller_name ORDER BY total_spend DESC;",
               "refId": "A"
             }
           ],
@@ -1474,7 +1474,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT round(sum(hf.invoice_total)::numeric, 2) AS total_handling_fees \nFROM instamart_handling_fees hf JOIN instamart_orders io ON hf.order_id = io.order_id WHERE $__timeFilter(hf.date_of_invoice) AND io.customer_id IN ($customer);",
+              "rawSql": "SELECT round(sum(hf.invoice_total)::numeric, 2) AS total_handling_fees \nFROM instamart_handling_fees hf JOIN instamart_orders io ON hf.order_id = io.order_id WHERE $__timeFilter(hf.date_of_invoice) AND io.(0 IN ($customer) OR customer_id IN ($customer));",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1568,7 +1568,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT ii.description, \nsum(ii.quantity) AS total_qty, \ncount(DISTINCT ii.order_id) AS in_orders, \nround(avg(ii.taxable_value)::numeric, 2) AS avg_mrp\nFROM instamart_order_items ii JOIN instamart_orders io ON ii.order_id = io.order_id \nWHERE $__timeFilter(io.date_of_invoice) AND io.customer_id IN ($customer) \nGROUP BY ii.description ORDER BY total_qty DESC;",
+              "rawSql": "SELECT ii.description, \nsum(ii.quantity) AS total_qty, \ncount(DISTINCT ii.order_id) AS in_orders, \nround(avg(ii.taxable_value)::numeric, 2) AS avg_mrp\nFROM instamart_order_items ii JOIN instamart_orders io ON ii.order_id = io.order_id \nWHERE $__timeFilter(io.date_of_invoice) AND io.(0 IN ($customer) OR customer_id IN ($customer)) \nGROUP BY ii.description ORDER BY total_qty DESC;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1650,7 +1650,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT count(*) FILTER (WHERE hf.invoice_total > 0) AS PAID_FEE, count(*) FILTER (WHERE hf.invoice_total = 0) AS zero_fees, round(avg(hf.invoice_total) FILTER (WHERE hf.invoice_total > 0)::numeric, 2) AS avg_fee FROM instamart_handling_fees hf JOIN instamart_orders io ON hf.order_id = io.order_id WHERE $__timeFilter(hf.date_of_invoice) AND io.customer_id IN ($customer);",
+              "rawSql": "SELECT count(*) FILTER (WHERE hf.invoice_total > 0) AS PAID_FEE, count(*) FILTER (WHERE hf.invoice_total = 0) AS zero_fees, round(avg(hf.invoice_total) FILTER (WHERE hf.invoice_total > 0)::numeric, 2) AS avg_fee FROM instamart_handling_fees hf JOIN instamart_orders io ON hf.order_id = io.order_id WHERE $__timeFilter(hf.date_of_invoice) AND io.(0 IN ($customer) OR customer_id IN ($customer));",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -1806,7 +1806,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "SELECT ii.description, sum(ii.quantity) AS qty, round(sum(ii.taxable_value)::numeric, 2) AS total_mrp, round(sum(ii.discount)::numeric, 2) AS total_discount, round((sum(ii.discount) / NULLIF(sum(ii.taxable_value), 0) * 100)::numeric, 1) AS discount_pct, round(sum(ii.total_amount)::numeric, 2) AS paid FROM instamart_order_items ii JOIN instamart_orders io ON ii.order_id = io.order_id WHERE $__timeFilter(io.date_of_invoice) AND io.customer_id IN ($customer) GROUP BY ii.description ORDER BY total_discount DESC LIMIT 20;",
+              "rawSql": "SELECT ii.description, sum(ii.quantity) AS qty, round(sum(ii.taxable_value)::numeric, 2) AS total_mrp, round(sum(ii.discount)::numeric, 2) AS total_discount, round((sum(ii.discount) / NULLIF(sum(ii.taxable_value), 0) * 100)::numeric, 1) AS discount_pct, round(sum(ii.total_amount)::numeric, 2) AS paid FROM instamart_order_items ii JOIN instamart_orders io ON ii.order_id = io.order_id WHERE $__timeFilter(io.date_of_invoice) AND io.(0 IN ($customer) OR customer_id IN ($customer)) GROUP BY ii.description ORDER BY total_discount DESC LIMIT 20;",
               "refId": "A"
             }
           ],
@@ -1899,7 +1899,7 @@
           "targets": [
             {
               "format": "time_series",
-              "rawSql": "SELECT date_trunc('month', hf.date_of_invoice) AS time, round(sum(hf.invoice_total)::numeric, 2) AS handling_fee FROM instamart_handling_fees hf JOIN instamart_orders io ON hf.order_id = io.order_id WHERE $__timeFilter(hf.date_of_invoice) AND hf.invoice_total > 0 AND io.customer_id IN ($customer) GROUP BY 1 ORDER BY 1;",
+              "rawSql": "SELECT date_trunc('month', hf.date_of_invoice) AS time, round(sum(hf.invoice_total)::numeric, 2) AS handling_fee FROM instamart_handling_fees hf JOIN instamart_orders io ON hf.order_id = io.order_id WHERE $__timeFilter(hf.date_of_invoice) AND hf.invoice_total > 0 AND io.(0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY 1;",
               "refId": "A"
             }
           ],
@@ -1995,7 +1995,7 @@
           "targets": [
             {
               "format": "time_series",
-              "rawSql": "SELECT date_trunc('month', io.date_of_invoice) AS time, round(sum(ii.discount)::numeric, 2) AS discount_saved, round(sum(ii.total_amount)::numeric, 2) AS amount_paid FROM instamart_orders io JOIN instamart_order_items ii ON io.order_id = ii.order_id WHERE $__timeFilter(io.date_of_invoice) AND io.customer_id IN ($customer) GROUP BY 1 ORDER BY 1;",
+              "rawSql": "SELECT date_trunc('month', io.date_of_invoice) AS time, round(sum(ii.discount)::numeric, 2) AS discount_saved, round(sum(ii.total_amount)::numeric, 2) AS amount_paid FROM instamart_orders io JOIN instamart_order_items ii ON io.order_id = ii.order_id WHERE $__timeFilter(io.date_of_invoice) AND io.(0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY 1;",
               "refId": "A"
             }
           ],
@@ -2102,12 +2102,12 @@
           "targets": [
             {
               "format": "time_series",
-              "rawSql": "SELECT date_of_invoice AS time, sum(invoice_total) OVER (ORDER BY date_of_invoice, order_id) AS cumulative_food FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) ORDER BY date_of_invoice;",
+              "rawSql": "SELECT date_of_invoice AS time, sum(invoice_total) OVER (ORDER BY date_of_invoice, order_id) AS cumulative_food FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) ORDER BY date_of_invoice;",
               "refId": "A"
             },
             {
               "format": "time_series",
-              "rawSql": "SELECT date_of_invoice AS time, sum(invoice_value) OVER (ORDER BY date_of_invoice, order_id) AS cumulative_instamart FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) ORDER BY date_of_invoice;",
+              "rawSql": "SELECT date_of_invoice AS time, sum(invoice_value) OVER (ORDER BY date_of_invoice, order_id) AS cumulative_instamart FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) ORDER BY date_of_invoice;",
               "refId": "B"
             }
           ],
@@ -2176,7 +2176,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "SELECT CASE WHEN invoice_value < 300 THEN '< 300' WHEN invoice_value < 600 THEN '300-599' WHEN invoice_value < 1000 THEN '600-999' WHEN invoice_value < 2000 THEN '1000-1999' ELSE '2000+' END AS bucket, count(*) AS orders FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY min(invoice_value);",
+              "rawSql": "SELECT CASE WHEN invoice_value < 300 THEN '< 300' WHEN invoice_value < 600 THEN '300-599' WHEN invoice_value < 1000 THEN '600-999' WHEN invoice_value < 2000 THEN '1000-1999' ELSE '2000+' END AS bucket, count(*) AS orders FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY min(invoice_value);",
               "refId": "A"
             }
           ],
@@ -2264,7 +2264,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "SELECT to_char(date_of_invoice, 'Day') AS day_name, count(*) AS orders, round(sum(total)::numeric, 2) AS total_spend, round(avg(total)::numeric, 2) AS avg_order FROM (SELECT date_of_invoice, invoice_total AS total FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) UNION ALL SELECT date_of_invoice, invoice_value FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)) all_orders GROUP BY 1, extract(DOW FROM date_of_invoice) ORDER BY extract(DOW FROM date_of_invoice);",
+              "rawSql": "SELECT to_char(date_of_invoice, 'Day') AS day_name, count(*) AS orders, round(sum(total)::numeric, 2) AS total_spend, round(avg(total)::numeric, 2) AS avg_order FROM (SELECT date_of_invoice, invoice_total AS total FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) UNION ALL SELECT date_of_invoice, invoice_value FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer))) all_orders GROUP BY 1, extract(DOW FROM date_of_invoice) ORDER BY extract(DOW FROM date_of_invoice);",
               "refId": "A"
             }
           ],
@@ -2335,7 +2335,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT CASE WHEN invoice_total < 500 THEN '< 500' WHEN invoice_total < 1000 THEN '500-999' WHEN invoice_total < 1500 THEN '1000-1499' WHEN invoice_total < 2000 THEN '1500-1999' ELSE '2000+' END AS bucket, count(*) AS orders FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY min(invoice_total);",
+              "rawSql": "SELECT CASE WHEN invoice_total < 500 THEN '< 500' WHEN invoice_total < 1000 THEN '500-999' WHEN invoice_total < 1500 THEN '1000-1499' WHEN invoice_total < 2000 THEN '1500-1999' ELSE '2000+' END AS bucket, count(*) AS orders FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) GROUP BY 1 ORDER BY min(invoice_total);",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2415,7 +2415,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "SELECT fi.description, count(DISTINCT date_trunc('month', fo.date_of_invoice)) AS months_ordered, sum(fi.quantity) AS total_qty, round(sum(fi.net_assessable_value)::numeric, 2) AS total_spend FROM food_order_items fi JOIN food_orders fo ON fi.order_id = fo.order_id WHERE $__timeFilter(fo.date_of_invoice) AND fo.customer_id IN ($customer) AND fi.description NOT ILIKE '%packing%' GROUP BY fi.description HAVING count(DISTINCT date_trunc('month', fo.date_of_invoice)) >= 2 ORDER BY months_ordered DESC, total_spend DESC;",
+              "rawSql": "SELECT fi.description, count(DISTINCT date_trunc('month', fo.date_of_invoice)) AS months_ordered, sum(fi.quantity) AS total_qty, round(sum(fi.net_assessable_value)::numeric, 2) AS total_spend FROM food_order_items fi JOIN food_orders fo ON fi.order_id = fo.order_id WHERE $__timeFilter(fo.date_of_invoice) AND fo.(0 IN ($customer) OR customer_id IN ($customer)) AND fi.description NOT ILIKE '%packing%' GROUP BY fi.description HAVING count(DISTINCT date_trunc('month', fo.date_of_invoice)) >= 2 ORDER BY months_ordered DESC, total_spend DESC;",
               "refId": "A"
             }
           ],
@@ -2476,7 +2476,7 @@
           "targets": [
             {
               "format": "table",
-              "rawSql": "WITH avg_food AS (SELECT avg(invoice_total) AS avg_val FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)), avg_instamart AS (SELECT avg(invoice_value) AS avg_val FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)) SELECT 'Food' AS type, order_id::text, date_of_invoice, restaurant_name AS name, round(invoice_total::numeric, 2) AS amount, round((invoice_total / af.avg_val)::numeric, 1) AS times_avg FROM food_orders, avg_food af WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) AND invoice_total > af.avg_val * 2 UNION ALL SELECT 'Instamart', order_id::text, date_of_invoice, seller_name, round(invoice_value::numeric, 2), round((invoice_value / ai.avg_val)::numeric, 1) FROM instamart_orders, avg_instamart ai WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) AND invoice_value > ai.avg_val * 2 ORDER BY amount DESC;",
+              "rawSql": "WITH avg_food AS (SELECT avg(invoice_total) AS avg_val FROM food_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer))), avg_instamart AS (SELECT avg(invoice_value) AS avg_val FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer))) SELECT 'Food' AS type, order_id::text, date_of_invoice, restaurant_name AS name, round(invoice_total::numeric, 2) AS amount, round((invoice_total / af.avg_val)::numeric, 1) AS times_avg FROM food_orders, avg_food af WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) AND invoice_total > af.avg_val * 2 UNION ALL SELECT 'Instamart', order_id::text, date_of_invoice, seller_name, round(invoice_value::numeric, 2), round((invoice_value / ai.avg_val)::numeric, 1) FROM instamart_orders, avg_instamart ai WHERE $__timeFilter(date_of_invoice) AND (0 IN ($customer) OR customer_id IN ($customer)) AND invoice_value > ai.avg_val * 2 ORDER BY amount DESC;",
               "refId": "A"
             }
           ],
@@ -2508,6 +2508,7 @@
           "uid": "swiggyit-postgres"
         },
         "definition": "SELECT name AS __text, id::text AS __value FROM customers ORDER BY name",
+        "allValue": "0",
         "includeAll": true,
         "label": "Customer",
         "multi": true,
