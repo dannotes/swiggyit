@@ -39,24 +39,14 @@ You'll need to request separate reports for **Food** and **Instamart**. If you w
 ### 1. Clone and configure
 
 ```bash
-git clone https://github.com/<your-username>/swiggyit.git
-cd swiggyit
+git clone https://github.com/dannotes/swiggyit.git
+cd swiggyit/deploy
 
-cd deploy
 cp .env.example .env
 # Edit .env and set your passwords
 ```
 
-### 2. Start PostgreSQL
-
-```bash
-cd deploy
-docker compose up -d postgres
-```
-
-The database schema is auto-created on first startup via `sql/schema.sql`.
-
-### 3. Place your exported PDFs
+### 2. Place your exported PDFs
 
 ```
 input/
@@ -66,27 +56,15 @@ input/
     └── order_summary_instamart_<uuid>.pdf
 ```
 
-### 4. Run the pipeline
-
-**Using Docker (recommended):**
+### 3. Run the pipeline
 
 ```bash
-cd deploy
 docker compose run --rm app
 ```
 
-**Or locally with Python 3.12+:**
+This pulls the pre-built image from `ghcr.io/dannotes/swiggyit`, starts PostgreSQL (auto-creates the schema on first run), parses your PDFs, and loads everything into the database.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-export POSTGRES_PASSWORD=your_password
-python3 src/main.py --input input --tmp .tmp
-```
-
-### 5. Output
+### 4. Output
 
 ```
 SwiggyIt - Swiggy Bill Parser
@@ -119,7 +97,6 @@ A pre-built Grafana dashboard with 30+ panels visualizes your spending across fo
 ### Start Grafana
 
 ```bash
-cd deploy
 docker compose up -d postgres grafana
 ```
 
@@ -144,6 +121,22 @@ Top sellers, most bought items, handling fee breakdown, discount savings, monthl
 Orders by day of week, order value distribution, cumulative spend over time, repeat purchases, outlier detection.
 
 ![Spending Patterns](screenshots/grafana-spending-patterns.png)
+
+## Development
+
+To build and run locally instead of pulling the pre-built image:
+
+```bash
+cd deploy
+docker compose -f docker-compose-dev.yml up --build
+```
+
+Run tests:
+
+```bash
+pip install -r requirements.txt
+pytest -m "not integration"
+```
 
 ## Re-running
 
@@ -181,8 +174,12 @@ swiggyit/
 ├── README.md
 ├── requirements.txt
 ├── pytest.ini
+├── .github/
+│   └── workflows/
+│       └── ci.yml                # Tests + GHCR image publish
 ├── deploy/
-│   ├── docker-compose.yml        # PostgreSQL + Grafana + app
+│   ├── docker-compose.yml        # Production (pulls from GHCR)
+│   ├── docker-compose-dev.yml    # Development (local build)
 │   └── .env.example
 ├── grafana/
 │   └── provisioning/

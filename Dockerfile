@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 
+LABEL org.opencontainers.image.source=https://github.com/dannotes/swiggyit
+LABEL org.opencontainers.image.description="Swiggy order data parser and analytics loader"
+
 WORKDIR /app
 
 COPY requirements.txt .
