@@ -1,0 +1,55 @@
+# PDF bills (contain personal data)
+Downloads/
+input/
+*.pdf
+
+# Processing cache (downloaded detail PDFs)
+.tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Environment / secrets
+.env
+*.env.local
+
+# PostgreSQL data (if mounted locally)
+pgdata/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Grafana data
+grafana/data/
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Type checking
+.mypy_cache/
+
+# Claude Code
+.claude/

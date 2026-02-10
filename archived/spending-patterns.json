@@ -1,0 +1,123 @@
+{
+  "uid": "swiggyit-patterns",
+  "title": "Spending Patterns",
+  "tags": ["swiggyit"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "",
+  "time": { "from": "now-1y", "to": "now" },
+  "timepicker": {},
+  "templating": {
+    "list": [
+      {
+        "name": "customer",
+        "label": "Customer",
+        "type": "query",
+        "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+        "definition": "SELECT name AS __text, id::text AS __value FROM customers ORDER BY name",
+        "query": "SELECT name AS __text, id::text AS __value FROM customers ORDER BY name",
+        "multi": true,
+        "includeAll": true,
+        "current": { "selected": true, "text": ["All"], "value": ["$__all"] },
+        "refresh": 1,
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Orders by Day of Week",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+      "targets": [{
+        "rawSql": "SELECT to_char(date_of_invoice, 'Day') AS day_name, count(*) AS orders, round(sum(total)::numeric, 2) AS total_spend, round(avg(total)::numeric, 2) AS avg_order FROM (SELECT date_of_invoice, invoice_total AS total FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) UNION ALL SELECT date_of_invoice, invoice_value FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)) all_orders GROUP BY 1, extract(DOW FROM date_of_invoice) ORDER BY extract(DOW FROM date_of_invoice);",
+        "format": "table",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Food Order Value Buckets",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+      "targets": [{
+        "rawSql": "SELECT CASE WHEN invoice_total < 500 THEN '< 500' WHEN invoice_total < 1000 THEN '500-999' WHEN invoice_total < 1500 THEN '1000-1499' WHEN invoice_total < 2000 THEN '1500-1999' ELSE '2000+' END AS bucket, count(*) AS orders FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY min(invoice_total);",
+        "format": "table",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Instamart Order Value Buckets",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+      "targets": [{
+        "rawSql": "SELECT CASE WHEN invoice_value < 300 THEN '< 300' WHEN invoice_value < 600 THEN '300-599' WHEN invoice_value < 1000 THEN '600-999' WHEN invoice_value < 2000 THEN '1000-1999' ELSE '2000+' END AS bucket, count(*) AS orders FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) GROUP BY 1 ORDER BY min(invoice_value);",
+        "format": "table",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Percentile Analysis",
+      "type": "table",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+      "targets": [{
+        "rawSql": "SELECT 'Food' AS type, round(percentile_cont(0.25) WITHIN GROUP (ORDER BY invoice_total)::numeric, 2) AS p25, round(percentile_cont(0.50) WITHIN GROUP (ORDER BY invoice_total)::numeric, 2) AS median, round(percentile_cont(0.75) WITHIN GROUP (ORDER BY invoice_total)::numeric, 2) AS p75, round(percentile_cont(0.90) WITHIN GROUP (ORDER BY invoice_total)::numeric, 2) AS p90 FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) UNION ALL SELECT 'Instamart', round(percentile_cont(0.25) WITHIN GROUP (ORDER BY invoice_value)::numeric, 2), round(percentile_cont(0.50) WITHIN GROUP (ORDER BY invoice_value)::numeric, 2), round(percentile_cont(0.75) WITHIN GROUP (ORDER BY invoice_value)::numeric, 2), round(percentile_cont(0.90) WITHIN GROUP (ORDER BY invoice_value)::numeric, 2) FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer);",
+        "format": "table",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Cumulative Spend Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+      "targets": [
+        {
+          "rawSql": "SELECT date_of_invoice AS time, sum(invoice_total) OVER (ORDER BY date_of_invoice, order_id) AS cumulative_food FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) ORDER BY date_of_invoice;",
+          "format": "time_series",
+          "refId": "A"
+        },
+        {
+          "rawSql": "SELECT date_of_invoice AS time, sum(invoice_value) OVER (ORDER BY date_of_invoice, order_id) AS cumulative_instamart FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) ORDER BY date_of_invoice;",
+          "format": "time_series",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "currencyINR", "custom": { "fillOpacity": 5 } }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Repeat Purchases (Food)",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+      "targets": [{
+        "rawSql": "SELECT fi.description, count(DISTINCT date_trunc('month', fo.date_of_invoice)) AS months_ordered, sum(fi.quantity) AS total_qty, round(sum(fi.net_assessable_value)::numeric, 2) AS total_spend FROM food_order_items fi JOIN food_orders fo ON fi.order_id = fo.order_id WHERE $__timeFilter(fo.date_of_invoice) AND fo.customer_id IN ($customer) AND fi.description NOT ILIKE '%packing%' GROUP BY fi.description HAVING count(DISTINCT date_trunc('month', fo.date_of_invoice)) >= 2 ORDER BY months_ordered DESC, total_spend DESC;",
+        "format": "table",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 7,
+      "title": "Outlier Orders (>2x Average)",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "uid": "swiggyit-postgres", "type": "postgres" },
+      "targets": [{
+        "rawSql": "WITH avg_food AS (SELECT avg(invoice_total) AS avg_val FROM food_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)), avg_instamart AS (SELECT avg(invoice_value) AS avg_val FROM instamart_orders WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer)) SELECT 'Food' AS type, order_id::text, date_of_invoice, restaurant_name AS name, round(invoice_total::numeric, 2) AS amount, round((invoice_total / af.avg_val)::numeric, 1) AS times_avg FROM food_orders, avg_food af WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) AND invoice_total > af.avg_val * 2 UNION ALL SELECT 'Instamart', order_id::text, date_of_invoice, seller_name, round(invoice_value::numeric, 2), round((invoice_value / ai.avg_val)::numeric, 1) FROM instamart_orders, avg_instamart ai WHERE $__timeFilter(date_of_invoice) AND customer_id IN ($customer) AND invoice_value > ai.avg_val * 2 ORDER BY amount DESC;",
+        "format": "table",
+        "refId": "A"
+      }]
+    }
+  ]
+}
